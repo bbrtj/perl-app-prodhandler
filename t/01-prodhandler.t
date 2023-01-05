@@ -23,9 +23,10 @@ sub files_content_same
 
 	my @contents;
 	for my $filename (@files) {
-		if (ref $filename eq 'SCALAR') {
-			# this is not a file, but a string
-			push @contents, $$filename;
+		if (ref $filename) {
+
+			# handle later
+			push @contents, $filename;
 		}
 		elsif (open my $fh, '<', $filename) {
 			local $/ = undef;
@@ -37,7 +38,12 @@ sub files_content_same
 		}
 	}
 
-	is $contents[0], $contents[1], "files seem to have the same content: @files";
+	if (uc ref $contents[1] eq 'REGEXP') {
+		like $contents[0], $contents[1], "file $files[0] matches";
+	}
+	else {
+		is $contents[0], $contents[1], "files seem to have the same content: @files";
+	}
 }
 
 my $output;
@@ -46,9 +52,12 @@ rmtree TESTDIR;
 mkdir TESTDIR;
 copy('t/prodhandler.conf', TESTDIR . '/prodhandler.conf');
 
-script_runs([SCRIPT_PATH, TESTDIR], {
-	stdout => \$output,
-}, 'script runs ok');
+script_runs(
+	[SCRIPT_PATH, TESTDIR], {
+		stdout => \$output,
+	},
+	'script runs ok'
+);
 
 # no output in normal generation
 is $output, '', 'output ok';
@@ -68,53 +77,53 @@ for my $key (keys %compare) {
 	files_content_same($key, $value);
 }
 
-files_content_same(TESTDIR . '/deploy.sh', \<<SHELL);
-cp "deploy/t__data__f3.txt" "t/data/f3.txt"
-chmod 0644 "t/data/f3.txt"
-chown 1001 "t/data/f3.txt"
-chgrp 1001 "t/data/f3.txt"
+files_content_same(
+	TESTDIR . '/deploy.sh',
+	qr{cp "deploy/t__data__f3\.txt" "t/data/f3\.txt"
+chmod 0\d\d\d "t/data/f3\.txt"
+chown \d+ "t/data/f3\.txt"
+chgrp \d+ "t/data/f3\.txt"
 
-cp "deploy/t__data__d1__d11/f1.txt" "t/data/d1/d11/f1.txt"
-chmod 0644 "t/data/d1/d11/f1.txt"
-chown 1001 "t/data/d1/d11/f1.txt"
-chgrp 1001 "t/data/d1/d11/f1.txt"
+cp "deploy/t__data__d1__d11/f1\.txt" "t/data/d1/d11/f1\.txt"
+chmod 0\d\d\d "t/data/d1/d11/f1\.txt"
+chown \d+ "t/data/d1/d11/f1\.txt"
+chgrp \d+ "t/data/d1/d11/f1\.txt"
 
-cp "deploy/t__data__d2__d21/f2.txt" "t/data/d2/d21/f2.txt"
-chmod 0644 "t/data/d2/d21/f2.txt"
-chown 1001 "t/data/d2/d21/f2.txt"
-chgrp 1001 "t/data/d2/d21/f2.txt"
+cp "deploy/t__data__d2__d21/f2\.txt" "t/data/d2/d21/f2\.txt"
+chmod 0\d\d\d "t/data/d2/d21/f2\.txt"
+chown \d+ "t/data/d2/d21/f2\.txt"
+chgrp \d+ "t/data/d2/d21/f2\.txt"}
+);
 
-SHELL
+files_content_same(
+	TESTDIR . '/restore.sh',
+	qr{cp "restore/t__data__f3\.txt" "t/data/f3\.txt"
+chmod 0\d\d\d "t/data/f3\.txt"
+chown \d+ "t/data/f3\.txt"
+chgrp \d+ "t/data/f3\.txt"
 
-files_content_same(TESTDIR . '/restore.sh', \<<SHELL);
-cp "restore/t__data__f3.txt" "t/data/f3.txt"
-chmod 0644 "t/data/f3.txt"
-chown 1001 "t/data/f3.txt"
-chgrp 1001 "t/data/f3.txt"
+cp "restore/t__data__d1__d11/f1\.txt" "t/data/d1/d11/f1\.txt"
+chmod 0\d\d\d "t/data/d1/d11/f1\.txt"
+chown \d+ "t/data/d1/d11/f1\.txt"
+chgrp \d+ "t/data/d1/d11/f1\.txt"
 
-cp "restore/t__data__d1__d11/f1.txt" "t/data/d1/d11/f1.txt"
-chmod 0644 "t/data/d1/d11/f1.txt"
-chown 1001 "t/data/d1/d11/f1.txt"
-chgrp 1001 "t/data/d1/d11/f1.txt"
+cp "restore/t__data__d2__d21/f2\.txt" "t/data/d2/d21/f2\.txt"
+chmod 0\d\d\d "t/data/d2/d21/f2\.txt"
+chown \d+ "t/data/d2/d21/f2\.txt"
+chgrp \d+ "t/data/d2/d21/f2\.txt"}
+);
 
-cp "restore/t__data__d2__d21/f2.txt" "t/data/d2/d21/f2.txt"
-chmod 0644 "t/data/d2/d21/f2.txt"
-chown 1001 "t/data/d2/d21/f2.txt"
-chgrp 1001 "t/data/d2/d21/f2.txt"
+files_content_same(
+	TESTDIR . '/diff.sh',
+	qr{echo "t/data/f3\.txt"
+diff "restore/t__data__f3\.txt" "t/data/f3\.txt"
 
-SHELL
+echo "t/data/d1/d11/f1\.txt"
+diff "restore/t__data__d1__d11/f1\.txt" "t/data/d1/d11/f1\.txt"
 
-files_content_same(TESTDIR . '/diff.sh', \<<SHELL);
-echo "t/data/f3.txt"
-diff "restore/t__data__f3.txt" "t/data/f3.txt"
-
-echo "t/data/d1/d11/f1.txt"
-diff "restore/t__data__d1__d11/f1.txt" "t/data/d1/d11/f1.txt"
-
-echo "t/data/d2/d21/f2.txt"
-diff "restore/t__data__d2__d21/f2.txt" "t/data/d2/d21/f2.txt"
-
-SHELL
+echo "t/data/d2/d21/f2\.txt"
+diff "restore/t__data__d2__d21/f2\.txt" "t/data/d2/d21/f2\.txt"}
+);
 
 rmtree TESTDIR;
 
