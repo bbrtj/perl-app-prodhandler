@@ -316,7 +316,7 @@ sub create_action
 
 					process_template(
 						FILE_DIFF,
-						_FROM => join_file([DEPLOY_DIR, $file->{mangled}]),
+						_FROM => join_file([RESTORE_DIR, $file->{mangled}]),
 						_TO => $file->{path},
 					);
 				};
@@ -407,17 +407,17 @@ Export the script itself into TARGET directory. It can then be copied over to th
 
 =head1 DESCRIPTION
 
-Generate proper files in TARGET directory (by default current working directory) using contents of C<prodhandler.conf> file in that directory.
+Generate proper files in TARGET directory (by default current working directory) using contents of configuration file in that directory.
 
-Upon generation, it will create a series of shell files which will make it easier and safer to handle live environments:
+Refer to L<App::ProdHandler> for detailed usage explanation.
 
-=over
+=head1 AUTHOR
 
-=item * deploy.sh
+Bartosz Jarzyna, E<lt>bbrtj.pro@gmail.comE<gt>
 
-=item * restore.sh
+=head1 COPYRIGHT AND LICENSE
 
-=item * diff.sh
+Copyright (C) 2023 by Bartosz Jarzyna
 
-=back
+FreeBSD 2-clause license - see LICENSE
 
