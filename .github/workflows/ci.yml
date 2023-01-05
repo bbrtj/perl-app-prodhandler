@@ -37,6 +37,10 @@ jobs:
         perl -v
         cpanm -v
 
+    - name: Install prereqs
+      run: |
+        cpanm --installdeps .
+
     - name: Install Test::More
       if:  ${{ startsWith( matrix.perl, '5.10') }}
       run: |
