@@ -131,7 +131,6 @@ sub mangle_file
 	return @filename;
 }
 
-
 sub init_files
 {
 	my ($files) = @_;
@@ -250,7 +249,7 @@ sub create_action
 			$action{desc} = join "\n",
 				'Create a directory',
 				'  mkdir -> ' . $action{dir}
-			;
+				;
 
 			$action{code} = sub {
 				mkdir $action{dir} unless -d $action{dir};
@@ -265,7 +264,7 @@ sub create_action
 				"Make copies of $action{file}{path}",
 				'  copy -> ' . $action{backup},
 				'  copy -> ' . $action{copy}
-			;
+				;
 
 			$action{code} = sub {
 				die "file $action{backup} already exists - aborting"
