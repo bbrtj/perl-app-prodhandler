@@ -8,6 +8,7 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Spec;
 use File::Copy qw(copy);
+use FindBin qw($RealBin $RealScript);
 
 use constant FILE_COPY => <<SHELL;
 cp "_FROM" "_TO"
@@ -47,7 +48,8 @@ $config_filename = join_file([$working_directory, $config_filename]);
 
 if ($export) {
 	my $export_to = join_file([$working_directory, 'transpierce']);
-	copy __FILE__, $export_to or die "could not copy into $export_to: $!";
+	my $script_path = join_file([$RealBin, $RealScript]);
+	copy $script_path, $export_to or die "could not copy $script_path into $export_to: $!";
 	chmod 0774, $export_to;
 }
 else {
