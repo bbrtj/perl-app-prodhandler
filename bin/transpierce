@@ -161,10 +161,10 @@ sub mangle_file
 		my @split = File::Spec->splitdir(shift);
 		join '__', map {
 			if ($_ eq '..') {
-				'UP'
+				'UP';
 			}
 			else {
-				$_
+				$_;
 			}
 		} @split;
 	};
@@ -361,7 +361,7 @@ sub create_action
 		},
 		touch => sub {
 			$copy_keys->(qw(file));
-			$action{path} = join_file([$working_directory, DEPLOY_DIR, $action{file}{mangled}]),
+			$action{path} = join_file([$working_directory, DEPLOY_DIR, $action{file}{mangled}]);
 
 			$action{desc} = join "\n",
 				'Create a new file',

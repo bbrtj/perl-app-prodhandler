@@ -1,6 +1,6 @@
 [PerlTidy]
 select = **/*.{pl,pm,t}
-select = bin/prodhandler
+select = bin/transpierce
 ignore = blib/**/*.{pl,pm,t}
 argv = -pro=./.perltidyrc --character-encoding=none
 
