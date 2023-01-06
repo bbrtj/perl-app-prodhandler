@@ -7,44 +7,15 @@ use Test::Script;
 use File::Path qw(rmtree);
 use File::Copy qw(copy);
 
+use lib 't/lib';
+use FileTests;
+
 # Keep this commented out to avoid wide character print warnings. The testing
 # code seems to work properly anyway
 # use utf8;
 
 use constant SCRIPT_PATH => 'bin/transpierce';
 use constant TESTDIR => 't/testdir';
-
-sub files_content_same
-{
-	my (@files) = @_;
-
-	die 'expected two filenames'
-		unless @files == 2;
-
-	my @contents;
-	for my $filename (@files) {
-		if (ref $filename) {
-
-			# handle later
-			push @contents, $filename;
-		}
-		elsif (open my $fh, '<', $filename) {
-			local $/ = undef;
-			push @contents, scalar readline $fh;
-		}
-		else {
-			fail "file $filename failed to open: $!";
-			return;
-		}
-	}
-
-	if (uc ref $contents[1] eq 'REGEXP') {
-		like $contents[0], $contents[1], "file $files[0] matches";
-	}
-	else {
-		is $contents[0], $contents[1], "files seem to have the same content: @files";
-	}
-}
 
 my $output;
 
