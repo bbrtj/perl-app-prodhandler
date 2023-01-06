@@ -43,8 +43,9 @@ SHELL
 
 use constant RESTORE_DIR => 'restore';
 use constant DEPLOY_DIR => 'deploy';
+use constant DEFAULT_CONFIG => 'transpierce.conf';
 
-my $config_filename = 'transpierce.conf';
+my $config_filename = undef;
 my $describe = !!0;
 my $help = !!0;
 my $export = !!0;
@@ -61,7 +62,8 @@ if ($help) {
 }
 
 my $working_directory = shift() // '.';
-$config_filename = join_file([$working_directory, $config_filename]);
+$config_filename = join_file([$working_directory, DEFAULT_CONFIG])
+	unless defined $config_filename;
 
 if ($export) {
 	my $export_to = join_file([$working_directory, 'transpierce']);
@@ -79,6 +81,11 @@ sub read_config
 {
 	open my $fh, '<:encoding(UTF-8)', $config_filename
 		or die "could not open $config_filename for reading: $!";
+
+	if (!-d $working_directory) {
+		mkdir $working_directory
+			or die "$working_directory did not exist, and couldn't be created: $!";
+	}
 
 	my $file_string = qr{ (["']) (?<str> .*) \g1 | (?<str> \S+) }x;
 	my $perm_string = qr{ (?<chmod> 0[0-7]{3}) \s (?<chown> \S+) \s (?<chgrp> \S+) }x;
@@ -382,7 +389,7 @@ sub create_action
 
 			$action{desc} = join "\n",
 				"Make copies of $action{file}{relpath}",
-				map { "  copy => $_" } @{$action{into}}
+				map { "  copy -> $_" } @{$action{into}}
 				;
 
 			$action{code} = sub {
@@ -474,7 +481,7 @@ Print a summary of actions which will be taken. Do not execute the actions.
 
 =item -c FILE, --config=FILE
 
-Specify a filename used for the configuration. Default is C<transpierce.conf>.
+Specify a filepath used for the configuration file. Default is C<transpierce.conf> in TARGET.
 
 =item -e, --self-export
 
