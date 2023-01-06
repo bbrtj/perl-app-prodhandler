@@ -19,10 +19,8 @@ chgrp _GID "_TO"
 
 SHELL
 
-use constant FILE_CREATE => <<SHELL;
+use constant FILE_CREATE => <<SHELL . FILE_COPY;
 mkdir -p "_DIR"
-@{[FILE_COPY]}
-
 SHELL
 
 use constant FILE_DELETE => <<SHELL;
