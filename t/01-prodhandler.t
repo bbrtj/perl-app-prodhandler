@@ -63,12 +63,12 @@ script_runs(
 is $output, '', 'output ok';
 
 my %compare = (
-	TESTDIR . '/restore/t__data__f3.txt' => 't/data/f3.txt',
-	TESTDIR . '/deploy/t__data__f3.txt' => 't/data/f3.txt',
-	TESTDIR . '/restore/t__data__d1__d11/f1.txt' => 't/data/d1/d11/f1.txt',
-	TESTDIR . '/deploy/t__data__d1__d11/f1.txt' => 't/data/d1/d11/f1.txt',
-	TESTDIR . '/restore/t__data__d2__d21/f2.txt' => 't/data/d2/d21/f2.txt',
-	TESTDIR . '/deploy/t__data__d2__d21/f2.txt' => 't/data/d2/d21/f2.txt',
+	TESTDIR . '/restore/UP__data__f3.txt' => 't/data/f3.txt',
+	TESTDIR . '/deploy/UP__data__f3.txt' => 't/data/f3.txt',
+	TESTDIR . '/restore/UP__data__d1__d11/f1.txt' => 't/data/d1/d11/f1.txt',
+	TESTDIR . '/deploy/UP__data__d1__d11/f1.txt' => 't/data/d1/d11/f1.txt',
+	TESTDIR . '/restore/UP__data__d2__d21/f2.txt' => 't/data/d2/d21/f2.txt',
+	TESTDIR . '/deploy/UP__data__d2__d21/f2.txt' => 't/data/d2/d21/f2.txt',
 );
 
 for my $key (keys %compare) {
@@ -79,50 +79,50 @@ for my $key (keys %compare) {
 
 files_content_same(
 	TESTDIR . '/deploy.sh',
-	qr{cp "deploy/t__data__f3\.txt" "t/data/f3\.txt"
-chmod 0\d\d\d "t/data/f3\.txt"
-chown \d+ "t/data/f3\.txt"
-chgrp \d+ "t/data/f3\.txt"
+	qr{cp "deploy/UP__data__f3\.txt" "\.\./data/f3\.txt"
+chmod 0\d{3} "\.\./data/f3\.txt"
+chown \d+ "\.\./data/f3\.txt"
+chgrp \d+ "\.\./data/f3\.txt"
 
-cp "deploy/t__data__d1__d11/f1\.txt" "t/data/d1/d11/f1\.txt"
-chmod 0\d\d\d "t/data/d1/d11/f1\.txt"
-chown \d+ "t/data/d1/d11/f1\.txt"
-chgrp \d+ "t/data/d1/d11/f1\.txt"
+cp "deploy/UP__data__d1__d11/f1\.txt" "\.\./data/d1/d11/f1\.txt"
+chmod 0\d{3} "\.\./data/d1/d11/f1\.txt"
+chown \d+ "\.\./data/d1/d11/f1\.txt"
+chgrp \d+ "\.\./data/d1/d11/f1\.txt"
 
-cp "deploy/t__data__d2__d21/f2\.txt" "t/data/d2/d21/f2\.txt"
-chmod 0\d\d\d "t/data/d2/d21/f2\.txt"
-chown \d+ "t/data/d2/d21/f2\.txt"
-chgrp \d+ "t/data/d2/d21/f2\.txt"}
+cp "deploy/UP__data__d2__d21/f2\.txt" "\.\./data/d2/d21/f2\.txt"
+chmod 0\d{3} "\.\./data/d2/d21/f2\.txt"
+chown \d+ "\.\./data/d2/d21/f2\.txt"
+chgrp \d+ "\.\./data/d2/d21/f2\.txt"}
 );
 
 files_content_same(
 	TESTDIR . '/restore.sh',
-	qr{cp "restore/t__data__f3\.txt" "t/data/f3\.txt"
-chmod 0\d\d\d "t/data/f3\.txt"
-chown \d+ "t/data/f3\.txt"
-chgrp \d+ "t/data/f3\.txt"
+	qr{cp "restore/UP__data__f3\.txt" "\.\./data/f3\.txt"
+chmod 0\d{3} "\.\./data/f3\.txt"
+chown \d+ "\.\./data/f3\.txt"
+chgrp \d+ "\.\./data/f3\.txt"
 
-cp "restore/t__data__d1__d11/f1\.txt" "t/data/d1/d11/f1\.txt"
-chmod 0\d\d\d "t/data/d1/d11/f1\.txt"
-chown \d+ "t/data/d1/d11/f1\.txt"
-chgrp \d+ "t/data/d1/d11/f1\.txt"
+cp "restore/UP__data__d1__d11/f1\.txt" "\.\./data/d1/d11/f1\.txt"
+chmod 0\d{3} "\.\./data/d1/d11/f1\.txt"
+chown \d+ "\.\./data/d1/d11/f1\.txt"
+chgrp \d+ "\.\./data/d1/d11/f1\.txt"
 
-cp "restore/t__data__d2__d21/f2\.txt" "t/data/d2/d21/f2\.txt"
-chmod 0\d\d\d "t/data/d2/d21/f2\.txt"
-chown \d+ "t/data/d2/d21/f2\.txt"
-chgrp \d+ "t/data/d2/d21/f2\.txt"}
+cp "restore/UP__data__d2__d21/f2\.txt" "\.\./data/d2/d21/f2\.txt"
+chmod 0\d{3} "\.\./data/d2/d21/f2\.txt"
+chown \d+ "\.\./data/d2/d21/f2\.txt"
+chgrp \d+ "\.\./data/d2/d21/f2\.txt"}
 );
 
 files_content_same(
 	TESTDIR . '/diff.sh',
-	qr{echo "t/data/f3\.txt"
-diff "restore/t__data__f3\.txt" "t/data/f3\.txt"
+	qr{echo "\.\./data/f3\.txt"
+diff "restore/UP__data__f3\.txt" "\.\./data/f3\.txt"
 
-echo "t/data/d1/d11/f1\.txt"
-diff "restore/t__data__d1__d11/f1\.txt" "t/data/d1/d11/f1\.txt"
+echo "\.\./data/d1/d11/f1\.txt"
+diff "restore/UP__data__d1__d11/f1\.txt" "\.\./data/d1/d11/f1\.txt"
 
-echo "t/data/d2/d21/f2\.txt"
-diff "restore/t__data__d2__d21/f2\.txt" "t/data/d2/d21/f2\.txt"}
+echo "\.\./data/d2/d21/f2\.txt"
+diff "restore/UP__data__d2__d21/f2\.txt" "\.\./data/d2/d21/f2\.txt"}
 );
 
 rmtree TESTDIR;

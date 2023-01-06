@@ -91,16 +91,23 @@ sub gather_file_info
 {
 	my ($file) = @_;
 	my $actual_file = join_file($file->{parts});
+	my $relpath = $actual_file;
+	my $absolute = File::Spec->file_name_is_absolute($relpath);
 
-	die "File $actual_file does not seem to exist"
-		unless -f $actual_file;
+	if (!$absolute) {
+		$relpath = join_file([$working_directory, $relpath]);
+	}
 
-	my @stat = stat $actual_file;
+	die "File $relpath does not seem to exist"
+		unless -f $relpath;
+
+	my @stat = stat $relpath;
 
 	$file->{chmod} = substr sprintf("%o", $stat[2]), 2, 4;
 	$file->{chown} = $stat[4];
 	$file->{chgrp} = $stat[5];
 	$file->{path} = $actual_file;
+	$file->{relpath} = $relpath;
 	$file->{mangled} = join_file([mangle_file($file->{parts})]);
 
 	if ($file->{parts}[0]) {
@@ -120,7 +127,17 @@ sub mangle_file
 	my @filename;
 	my ($context, $name) = @$file;
 
-	my $mangler = sub { join '__', File::Spec->splitdir(shift) };
+	my $mangler = sub {
+		my @split = File::Spec->splitdir(shift);
+		join '__', map {
+			if ($_ eq '..') {
+				'UP'
+			}
+			else {
+				$_
+			}
+		} @split;
+	};
 
 	if ($context) {
 		push @filename, $mangler->($context);
@@ -261,7 +278,7 @@ sub create_action
 			$action{copy} = join_file([$working_directory, DEPLOY_DIR, $action{file}{mangled}]);
 
 			$action{desc} = join "\n",
-				"Make copies of $action{file}{path}",
+				"Make copies of $action{file}{relpath}",
 				'  copy -> ' . $action{backup},
 				'  copy -> ' . $action{copy}
 				;
@@ -270,14 +287,14 @@ sub create_action
 				die "file $action{backup} already exists - aborting"
 					if -e $action{backup};
 
-				copy $action{file}{path}, $action{backup} or die "could not copy into $action{backup}: $!";
-				copy $action{file}{path}, $action{copy} or die "could not copy into $action{copy}: $!";
+				copy $action{file}{relpath}, $action{backup} or die "could not copy into $action{backup}: $!";
+				copy $action{file}{relpath}, $action{copy} or die "could not copy into $action{copy}: $!";
 			};
 		},
 		create_script => sub {
 			$copy_keys->(qw(type dest files));
 			$action{desc} = "Create script in $action{dest}\n" . join "\n", map {
-				"  $action{type} -> $_->{path}"
+				"  $action{type} -> $_->{relpath}"
 			} @{$action{files}};
 
 			my $inner_sub;
@@ -366,7 +383,7 @@ sub print_permissions
 
 	say "Files specified in the config file";
 	foreach my $file (@$config) {
-		say $file->{path};
+		say $file->{relpath};
 		say "  mode -> $file->{chmod}";
 		say "  uid -> $file->{chown}";
 		say "  gid -> $file->{chgrp}";

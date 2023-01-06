@@ -102,6 +102,19 @@ If files in your C<prodhandler.conf> contain whitespace, you will need to quote 
 	target "/dir/with space"
 		'file with space'
 
+You can use relative paths in the configuration:
+
+	../dir/file1
+	target ../dir
+		file2
+
+These paths will end up like this:
+
+	UP__dir__file1
+	UP__dir/file2
+
+They must be relative to the location of configuration file, not to the location from which you run C<prodhandler>! When in doubt, use absolute paths.
+
 =head2 Scripts
 
 C<prodhandler> script is only used once during initialization. After that, work is performed using generated shell scripts.
