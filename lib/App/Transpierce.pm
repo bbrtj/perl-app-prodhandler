@@ -48,7 +48,13 @@ App::Transpierce - backup and modify important files
 This distribution provides C<transpierce> script which can be used for per-task
 management of files which must be backed up before modification.
 
-Suppose you must reproduce a bug that only happens undef a very specific
+Transpierce means to pierce through. The module makes it easier penetrate
+system files and alter them by working on local copies. You only poke single
+holes in it by performing file deployment and (if needed) backup restoration.
+If you think that's not how it's supposed to be done, you're right - but
+sometimes it is what needs to be done.
+
+Suppose you must reproduce a bug that only happens under a very specific
 environment. Or you have to quickly hotfix something and full release cycle
 will not be fast enough. Do you change live files? Or make copies as backups
 and then do modifications? Are you sure you restored all unwanted changes?
@@ -57,9 +63,9 @@ This script will set up a small working environment for you, which consists of:
 
 =over
 
-=item * a C<restore> directory, containing original files (not meant to be changed)
+=item * C<restore> directory, containing original files (not meant to be changed)
 
-=item * a C<deploy> directory, where you can make your changes
+=item * C<deploy> directory, where you can make your changes
 
 =item * C<restore.sh> script, which will restore original files from C<restore> directory
 
@@ -158,9 +164,9 @@ This design choice does two things:
 
 =over
 
-=item * lets you verify the contents of the files to see whether they do what is advertised and do not break anything else
+=item * lets you audit the contents of the files to see whether they do what is advertised and do not break anything else
 
-=item * makes it trivial to do any modifications to deployment / restoration
+=item * makes it trivial to do any modifications
 
 =back
 
