@@ -243,6 +243,54 @@ sub spurt
 		or die "could not close $file: $!";
 }
 
+sub get_script_generator
+{
+	my ($type) = @_;
+
+	if ($type eq 'restore') {
+		return sub {
+			my ($file) = @_;
+
+			process_template(
+				FILE_COPY,
+				_FROM => join_file([RESTORE_DIR, $file->{mangled}]),
+				_TO => $file->{path},
+				_MODE => $file->{chmod},
+				_UID => $file->{chown},
+				_GID => $file->{chgrp},
+			);
+		};
+	}
+	elsif ($type eq 'deploy') {
+		return sub {
+			my ($file) = @_;
+
+			process_template(
+				FILE_COPY,
+				_FROM => join_file([DEPLOY_DIR, $file->{mangled}]),
+				_TO => $file->{path},
+				_MODE => $file->{chmod},
+				_UID => $file->{chown},
+				_GID => $file->{chgrp},
+			);
+		};
+	}
+	elsif ($type eq 'diff') {
+		return sub {
+			my ($file) = @_;
+
+			process_template(
+				FILE_DIFF,
+				_FROM => join_file([RESTORE_DIR, $file->{mangled}]),
+				_TO => $file->{path},
+			);
+		};
+	}
+	else {
+		die "unknown script type $type";
+	}
+}
+
 sub create_action
 {
 	my ($type, %opts) = @_;
@@ -299,49 +347,7 @@ sub create_action
 				"  $action{type} -> $_->{relpath}"
 			} @{$action{files}};
 
-			my $inner_sub;
-			if ($action{type} eq 'restore') {
-				$inner_sub = sub {
-					my ($file) = @_;
-
-					process_template(
-						FILE_COPY,
-						_FROM => join_file([RESTORE_DIR, $file->{mangled}]),
-						_TO => $file->{path},
-						_MODE => $file->{chmod},
-						_UID => $file->{chown},
-						_GID => $file->{chgrp},
-					);
-				};
-			}
-			elsif ($action{type} eq 'deploy') {
-				$inner_sub = sub {
-					my ($file) = @_;
-
-					process_template(
-						FILE_COPY,
-						_FROM => join_file([DEPLOY_DIR, $file->{mangled}]),
-						_TO => $file->{path},
-						_MODE => $file->{chmod},
-						_UID => $file->{chown},
-						_GID => $file->{chgrp},
-					);
-				};
-			}
-			elsif ($action{type} eq 'diff') {
-				$inner_sub = sub {
-					my ($file) = @_;
-
-					process_template(
-						FILE_DIFF,
-						_FROM => join_file([RESTORE_DIR, $file->{mangled}]),
-						_TO => $file->{path},
-					);
-				};
-			}
-			else {
-				die "unknown script type $action{type}";
-			}
+			my $inner_sub = get_script_generator($action{type});
 
 			$action{code} = sub {
 				my $output = '';
