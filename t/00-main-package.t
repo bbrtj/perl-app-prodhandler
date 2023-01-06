@@ -4,9 +4,9 @@ use warnings;
 
 use Test::More;
 
-# App::ProdHandler should have no code, but still - verify whether it is
+# App::Transpierce should have no code, but still - verify whether it is
 # required ok
-use_ok 'App::ProdHandler';
+use_ok 'App::Transpierce';
 
 done_testing;
 

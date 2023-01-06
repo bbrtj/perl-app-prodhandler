@@ -26,7 +26,7 @@ SHELL
 use constant RESTORE_DIR => 'restore';
 use constant DEPLOY_DIR => 'deploy';
 
-my $config_filename = 'prodhandler.conf';
+my $config_filename = 'transpierce.conf';
 my $describe = !!0;
 my $help = !!0;
 my $export = !!0;
@@ -46,7 +46,7 @@ my $working_directory = shift() // '.';
 $config_filename = join_file([$working_directory, $config_filename]);
 
 if ($export) {
-	my $export_to = join_file([$working_directory, 'prodhandler']);
+	my $export_to = join_file([$working_directory, 'transpierce']);
 	copy __FILE__, $export_to or die "could not copy into $export_to: $!";
 	chmod 0774, $export_to;
 }
@@ -397,11 +397,11 @@ __END__
 
 =head1 NAME
 
-prodhandler - Script for safer handling of production environments
+transpierce - script for safer infiltration of sensitive environments
 
 =head1 SYNOPSIS
 
-	prodhandler [OPTIONS] TARGET
+	transpierce [OPTIONS] TARGET
 
 =head1 OPTIONS
 
@@ -413,19 +413,21 @@ Print a summary of actions which will be taken. Do not execute the actions.
 
 =item -c FILE, --config=FILE
 
-Specify a filename used for the configuration. Default is C<prodhandler.conf>.
+Specify a filename used for the configuration. Default is C<transpierce.conf>.
 
 =item -e, --self-export
 
-Export the script itself into TARGET directory. It can then be copied over to the target machine.
+Export the script itself into TARGET directory. It can then be copied over to
+the target machine.
 
 =back
 
 =head1 DESCRIPTION
 
-Generate proper files in TARGET directory (by default current working directory) using contents of configuration file in that directory.
+Generate proper files in TARGET directory (by default current working
+directory) using contents of configuration file in that directory.
 
-Refer to L<App::ProdHandler> for detailed usage explanation.
+Refer to L<App::Transpierce> for detailed usage explanation.
 
 =head1 AUTHOR
 

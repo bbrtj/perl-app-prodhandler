@@ -1,8 +1,8 @@
-# App::ProdHandler
-A Perl module for safer handling of production files.
+# App::Transpierce
+A Perl module for safer infiltration of sensitive environments.
 
 ## Code and documentation
-[App::ProdHandler on CPAN](https://metacpan.org/release/App-ProdHandler)
+[App::Transpierce on CPAN](https://metacpan.org/release/App-Transpierce)
 
 ## Bugs and feature requests
 Please use the Github's issue tracker to file both bugs and feature requests.

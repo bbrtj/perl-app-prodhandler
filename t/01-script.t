@@ -11,7 +11,7 @@ use File::Copy qw(copy);
 # code seems to work properly anyway
 # use utf8;
 
-use constant SCRIPT_PATH => 'bin/prodhandler';
+use constant SCRIPT_PATH => 'bin/transpierce';
 use constant TESTDIR => 't/testdir';
 
 sub files_content_same
@@ -50,7 +50,7 @@ my $output;
 
 rmtree TESTDIR;
 mkdir TESTDIR;
-copy('t/prodhandler.conf', TESTDIR . '/prodhandler.conf');
+copy('t/transpierce.conf', TESTDIR . '/transpierce.conf');
 
 script_runs(
 	[SCRIPT_PATH, TESTDIR], {
