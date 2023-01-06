@@ -85,6 +85,24 @@ During copying the files to C<restore> and C<deploy> their paths are flattened, 
 	__prod__script.pl
 	__etc__apache2__sites-available__mysite.conf
 
+If files in your C<transpierce.conf> contain whitespace, you will need to quote
+using either single or double quotes:
+
+	target "/dir/with space/file_with_space"
+
+You can use relative paths in the configuration:
+
+	../dir/file1
+
+This path will be transformed into this (double dot replaced with C<UP> word):
+
+	UP__dir__file1
+
+It must be relative to the location of configuration file, not to the
+location from which you run C<transpierce>! When in doubt, use absolute paths.
+
+=head3 Targets
+
 You can set targets in C<transpierce.conf>:
 
 	target /prod
@@ -99,29 +117,37 @@ Which will change the local paths like this:
 	__prod/script.pl
 	__etc__apache2/sites-available__mysite.conf
 
-Now two directories will be created: C<__prod> and C<__etc__apache2>. This way
-the directory structure of working copies can be less chaotic by maintaining
-context with a single directory for each target.
+Now two local directories will be created: C<__prod> and C<__etc__apache2>.
+This way the directory structure of working copies can be less chaotic by
+maintaining context with a single directory for each target.
 
-If files in your C<transpierce.conf> contain whitespace, you will need to quote
-using either single or double quotes:
+=head3 New files
 
-	target "/dir/with space"
-		'file with space'
+It's possible to create new files:
 
-You can use relative paths in the configuration:
+	new 0777 user group "../file.txt"
+	target ".."
+		new 0777 user group "../file2.txt"
 
-	../dir/file1
-	target ../dir
-		file2
+For such files:
 
-These paths will end up like this (double dot replaced with C<UP> word):
+=over
 
-	UP__dir__file1
-	UP__dir/file2
+=item * they will be created (empty) in C<deploy> directory
 
-They must be relative to the location of configuration file, not to the
-location from which you run C<transpierce>! When in doubt, use absolute paths.
+=item * they will not exist in C<restore> directory
+
+=item * C<deploy.sh> will create full directory path to them with default permissions
+
+=item * C<restore.sh> will remove these files altogether (but not the directories)
+
+=item * C<diff.sh> will C<ls -l> these files
+
+=item * three words used after C<new> will be used for C<chmod>, C<chown> and C<chgrp> respectively and are required
+
+=item * file permissions must be octal number in form of C<0NNN> (cannot be C<+x> for example)
+
+=back
 
 =head2 Scripts
 

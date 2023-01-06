@@ -9,6 +9,7 @@ use Pod::Usage;
 use File::Spec;
 use File::Copy qw(copy);
 use FindBin qw($RealBin $RealScript);
+use File::Basename qw(fileparse);
 
 use constant FILE_COPY => <<SHELL;
 cp "_FROM" "_TO"
@@ -18,9 +19,25 @@ chgrp _GID "_TO"
 
 SHELL
 
+use constant FILE_CREATE => <<SHELL;
+mkdir -p "_DIR"
+@{[FILE_COPY]}
+
+SHELL
+
+use constant FILE_DELETE => <<SHELL;
+rm "_TO"
+
+SHELL
+
 use constant FILE_DIFF => <<SHELL;
 echo "_TO"
 diff "_FROM" "_TO"
+
+SHELL
+
+use constant FILE_LS => <<SHELL;
+ls -l "_TO"
 
 SHELL
 
@@ -63,19 +80,27 @@ sub read_config
 	open my $fh, '<:encoding(UTF-8)', $config_filename
 		or die "could not open $config_filename for reading: $!";
 
-	my $conf_string = qr{ (["']) (?<str> .*) \g1 | (?<str> \S+) }x;
+	my $file_string = qr{ (["']) (?<str> .*) \g1 | (?<str> \S+) }x;
+	my $perm_string = qr{ (?<chmod> 0[0-7]{3}) \s (?<chown> \S+) \s (?<chgrp> \S+) }x;
 
 	my $context = undef;
 	my @files;
 
 	while (my $line = readline $fh) {
-		if ($line =~ m{\A target \s+ $conf_string}x) {
+		if ($line =~ m{\A target \s+ $file_string}x) {
 			$context = $+{str};
 		}
-		elsif ($line =~ $conf_string) {
+		elsif ($line =~ m{\A \s* (?: (new) \s+ $perm_string \s+ $file_string | $file_string ) \s* \z}x) {
 			my $file = {
-				parts => [$context, $+{str}]
+				parts => [$context, $+{str}],
 			};
+
+			if ($1 && $1 eq 'new') {
+				$file->{new} = !!1;
+				$file->{chmod} = $+{chmod};
+				$file->{chown} = $+{chown};
+				$file->{chgrp} = $+{chgrp};
+			}
 
 			gather_file_info($file);
 
@@ -100,14 +125,17 @@ sub gather_file_info
 		$relpath = join_file([$working_directory, $relpath]);
 	}
 
-	die "File $relpath does not seem to exist"
-		unless -f $relpath;
+	if (!$file->{new}) {
+		die "File $relpath does not seem to exist"
+			unless -f $relpath;
 
-	my @stat = stat $relpath;
+		my @stat = stat $relpath;
 
-	$file->{chmod} = substr sprintf("%o", $stat[2]), 2, 4;
-	$file->{chown} = $stat[4];
-	$file->{chgrp} = $stat[5];
+		$file->{chmod} = substr sprintf("%o", $stat[2]), 2, 4;
+		$file->{chown} = $stat[4];
+		$file->{chgrp} = $stat[5];
+	}
+
 	$file->{path} = $actual_file;
 	$file->{relpath} = $relpath;
 	$file->{mangled} = join_file([mangle_file($file->{parts})]);
@@ -180,10 +208,18 @@ sub init_files
 			);
 		}
 
-		push @actions, create_action(
-			'copy',
-			file => $file,
-		);
+		if ($file->{new}) {
+			push @actions, create_action(
+				'touch',
+				file => $file,
+			);
+		}
+		else {
+			push @actions, create_action(
+				'copy',
+				file => $file,
+			);
+		}
 	}
 
 	return @actions;
@@ -251,8 +287,8 @@ sub get_script_generator
 		return sub {
 			my ($file) = @_;
 
-			process_template(
-				FILE_COPY,
+			return process_template(
+				$file->{new} ? FILE_DELETE : FILE_COPY,
 				_FROM => join_file([RESTORE_DIR, $file->{mangled}]),
 				_TO => $file->{path},
 				_MODE => $file->{chmod},
@@ -265,13 +301,14 @@ sub get_script_generator
 		return sub {
 			my ($file) = @_;
 
-			process_template(
-				FILE_COPY,
+			return process_template(
+				$file->{new} ? FILE_CREATE : FILE_COPY,
 				_FROM => join_file([DEPLOY_DIR, $file->{mangled}]),
 				_TO => $file->{path},
 				_MODE => $file->{chmod},
 				_UID => $file->{chown},
 				_GID => $file->{chgrp},
+				_DIR => (fileparse($file->{path}))[1],
 			);
 		};
 	}
@@ -279,8 +316,8 @@ sub get_script_generator
 		return sub {
 			my ($file) = @_;
 
-			process_template(
-				FILE_DIFF,
+			return process_template(
+				$file->{new} ? FILE_LS : FILE_DIFF,
 				_FROM => join_file([RESTORE_DIR, $file->{mangled}]),
 				_TO => $file->{path},
 			);
@@ -322,23 +359,39 @@ sub create_action
 				mkdir $action{dir} unless -d $action{dir};
 			};
 		},
-		copy => sub {
+		touch => sub {
 			$copy_keys->(qw(file));
-			$action{backup} = join_file([$working_directory, RESTORE_DIR, $action{file}{mangled}]);
-			$action{copy} = join_file([$working_directory, DEPLOY_DIR, $action{file}{mangled}]);
+			$action{path} = join_file([$working_directory, DEPLOY_DIR, $action{file}{mangled}]),
 
 			$action{desc} = join "\n",
-				"Make copies of $action{file}{relpath}",
-				'  copy -> ' . $action{backup},
-				'  copy -> ' . $action{copy}
+				'Create a new file',
+				"  touch -> $action{path}"
 				;
 
 			$action{code} = sub {
-				die "file $action{backup} already exists - aborting"
-					if -e $action{backup};
+				open my $fh, '>', $action{path}
+					or die "Could not create $action{path}: $!";
+			};
+		},
+		copy => sub {
+			$copy_keys->(qw(file));
+			$action{into} = [
+				join_file([$working_directory, RESTORE_DIR, $action{file}{mangled}]),
+				join_file([$working_directory, DEPLOY_DIR, $action{file}{mangled}]),
+			];
 
-				copy $action{file}{relpath}, $action{backup} or die "could not copy into $action{backup}: $!";
-				copy $action{file}{relpath}, $action{copy} or die "could not copy into $action{copy}: $!";
+			$action{desc} = join "\n",
+				"Make copies of $action{file}{relpath}",
+				map { "  copy => $_" } @{$action{into}}
+				;
+
+			$action{code} = sub {
+				foreach my $into (@{$action{into}}) {
+					die "file $into already exists - aborting"
+						if -e $into;
+
+					copy $action{file}{relpath}, $into or die "could not copy into $into: $!";
+				}
 			};
 		},
 		create_script => sub {
