@@ -41,60 +41,72 @@ sub test_working_env
 
 	files_content_same(
 		$dir . '/deploy.sh',
-		qr{\A\s*cp "deploy/UP__data__f3\.txt" "\.\./data/f3\.txt"
-chmod 0[0-7]{3} "\.\./data/f3\.txt"
-chown \d+ "\.\./data/f3\.txt"
-chgrp \d+ "\.\./data/f3\.txt"
-
-cp "deploy/UP__data__d1__d11/f1\.txt" "\.\./data/d1/d11/f1\.txt"
-chmod 0[0-7]{3} "\.\./data/d1/d11/f1\.txt"
-chown \d+ "\.\./data/d1/d11/f1\.txt"
-chgrp \d+ "\.\./data/d1/d11/f1\.txt"
-
-cp "deploy/UP__data__d2__d21/f2\.txt" "\.\./data/d2/d21/f2\.txt"
-chmod 0[0-7]{3} "\.\./data/d2/d21/f2\.txt"
-chown \d+ "\.\./data/d2/d21/f2\.txt"
-chgrp \d+ "\.\./data/d2/d21/f2\.txt"
-
-mkdir -p "\.\./data/d2/d21/newdir/"
-cp "deploy/UP__data__d2__d21/newdir__fnew\.txt" "\.\./data/d2/d21/newdir/fnew\.txt"
-chmod 0666 "\.\./data/d2/d21/newdir/fnew\.txt"
-chown user "\.\./data/d2/d21/newdir/fnew\.txt"
-chgrp group "\.\./data/d2/d21/newdir/fnew\.txt"\s*\z}
+		qr{
+			\A \s*
+			cp [ ] "deploy/UP__data__f3\.txt" [ ] "\.\./data/f3\.txt" \v
+			chmod [ ] 0[0-7]{3} [ ] "\.\./data/f3\.txt" \v
+			chown [ ] \d+ [ ] "\.\./data/f3\.txt" \v
+			chgrp [ ] \d+ [ ] "\.\./data/f3\.txt" \v
+			\v
+			cp [ ] "deploy/UP__data__d1__d11/f1\.txt" [ ] "\.\./data/d1/d11/f1\.txt" \v
+			chmod [ ] 0[0-7]{3} [ ] "\.\./data/d1/d11/f1\.txt" \v
+			chown [ ] \d+ [ ] "\.\./data/d1/d11/f1\.txt" \v
+			chgrp [ ] \d+ [ ] "\.\./data/d1/d11/f1\.txt" \v
+			\v
+			cp [ ] "deploy/UP__data__d2__d21/f2\.txt" [ ] "\.\./data/d2/d21/f2\.txt" \v
+			chmod [ ] 0[0-7]{3} [ ] "\.\./data/d2/d21/f2\.txt" \v
+			chown [ ] \d+ [ ] "\.\./data/d2/d21/f2\.txt" \v
+			chgrp [ ] \d+ [ ] "\.\./data/d2/d21/f2\.txt" \v
+			\v
+			mkdir [ ] -p [ ] "\.\./data/d2/d21/newdir/" \v
+			cp [ ] "deploy/UP__data__d2__d21/newdir__fnew\.txt" [ ] "\.\./data/d2/d21/newdir/fnew\.txt" \v
+			chmod [ ] 0666 [ ] "\.\./data/d2/d21/newdir/fnew\.txt" \v
+			chown [ ] user [ ] "\.\./data/d2/d21/newdir/fnew\.txt" \v
+			chgrp [ ] group [ ] "\.\./data/d2/d21/newdir/fnew\.txt" \v
+			\s* \z
+		}x
 	);
 
 	files_content_same(
 		$dir . '/restore.sh',
-		qr{cp "restore/UP__data__f3\.txt" "\.\./data/f3\.txt"
-chmod 0[0-7]{3} "\.\./data/f3\.txt"
-chown \d+ "\.\./data/f3\.txt"
-chgrp \d+ "\.\./data/f3\.txt"
-
-cp "restore/UP__data__d1__d11/f1\.txt" "\.\./data/d1/d11/f1\.txt"
-chmod 0[0-7]{3} "\.\./data/d1/d11/f1\.txt"
-chown \d+ "\.\./data/d1/d11/f1\.txt"
-chgrp \d+ "\.\./data/d1/d11/f1\.txt"
-
-cp "restore/UP__data__d2__d21/f2\.txt" "\.\./data/d2/d21/f2\.txt"
-chmod 0[0-7]{3} "\.\./data/d2/d21/f2\.txt"
-chown \d+ "\.\./data/d2/d21/f2\.txt"
-chgrp \d+ "\.\./data/d2/d21/f2\.txt"
-
-rm "\.\./data/d2/d21/newdir/fnew\.txt"\s*\z}
+		qr{
+			\A \s*
+			cp [ ] "restore/UP__data__f3\.txt" [ ] "\.\./data/f3\.txt" \v
+			chmod [ ] 0[0-7]{3} [ ] "\.\./data/f3\.txt" \v
+			chown [ ] \d+ [ ] "\.\./data/f3\.txt" \v
+			chgrp [ ] \d+ [ ] "\.\./data/f3\.txt" \v
+			\v
+			cp [ ] "restore/UP__data__d1__d11/f1\.txt" [ ] "\.\./data/d1/d11/f1\.txt" \v
+			chmod [ ] 0[0-7]{3} [ ] "\.\./data/d1/d11/f1\.txt" \v
+			chown [ ] \d+ [ ] "\.\./data/d1/d11/f1\.txt" \v
+			chgrp [ ] \d+ [ ] "\.\./data/d1/d11/f1\.txt" \v
+			\v
+			cp [ ] "restore/UP__data__d2__d21/f2\.txt" [ ] "\.\./data/d2/d21/f2\.txt" \v
+			chmod [ ] 0[0-7]{3} [ ] "\.\./data/d2/d21/f2\.txt" \v
+			chown [ ] \d+ [ ] "\.\./data/d2/d21/f2\.txt" \v
+			chgrp [ ] \d+ [ ] "\.\./data/d2/d21/f2\.txt" \v
+			\v
+			rm [ ] "\.\./data/d2/d21/newdir/fnew\.txt"
+			\s* \z
+		}x
 	);
 
 	files_content_same(
 		$dir . '/diff.sh',
-		qr{\A\s*echo "\.\./data/f3\.txt"
-diff "restore/UP__data__f3\.txt" "\.\./data/f3\.txt"
-
-echo "\.\./data/d1/d11/f1\.txt"
-diff "restore/UP__data__d1__d11/f1\.txt" "\.\./data/d1/d11/f1\.txt"
-
-echo "\.\./data/d2/d21/f2\.txt"
-diff "restore/UP__data__d2__d21/f2\.txt" "\.\./data/d2/d21/f2\.txt"
-
-ls -l "\.\./data/d2/d21/newdir/fnew\.txt"\s*\z}
+		qr{
+			\A \s*
+			echo [ ] "\.\./data/f3\.txt" \v
+			diff [ ] "restore/UP__data__f3\.txt" [ ] "\.\./data/f3\.txt" \v
+			\v
+			echo [ ] "\.\./data/d1/d11/f1\.txt" \v
+			diff [ ] "restore/UP__data__d1__d11/f1\.txt" [ ] "\.\./data/d1/d11/f1\.txt" \v
+			\v
+			echo [ ] "\.\./data/d2/d21/f2\.txt" \v
+			diff [ ] "restore/UP__data__d2__d21/f2\.txt" [ ] "\.\./data/d2/d21/f2\.txt" \v
+			\v
+			ls [ ] -l [ ] "\.\./data/d2/d21/newdir/fnew\.txt" \v
+			\s* \z
+		}x
 	);
 }
 
