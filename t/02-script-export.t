@@ -30,7 +30,7 @@ script_runs(
 );
 
 # no output in normal generation
-is $output, '', 'output ok';
+ok !$output, 'output ok';
 
 my %compare = (
 	TESTDIR . '/transpierce' => SCRIPT_PATH,

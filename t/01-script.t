@@ -113,7 +113,7 @@ subtest 'should work when conf is inside target' => sub {
 	);
 
 	# no output in normal generation
-	is $output, '', 'output ok';
+	ok !$output, 'output ok';
 
 	test_working_env(TESTDIR);
 };
@@ -131,7 +131,7 @@ subtest 'should work with -c outside target and directory not existing' => sub {
 	);
 
 	# no output in normal generation
-	is $output, '', 'output ok';
+	ok !$output, 'output ok';
 
 	test_working_env(TESTDIR);
 };
